@@ -1,15 +1,32 @@
-// app/ordenes/[id]/page.tsx (versión mejorada con shadcn/ui)
+// app/ordenes/[id]/page.tsx (versión final y corregida)
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import Image from 'next/image'; // <--- 1. IMPORTAMOS EL COMPONENTE DE IMAGEN
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OrdenDetallesPage({ params }: { params: { id: string } }) {
+// 2. DEFINIMOS LAS PROPS DE FORMA ESTÁNDAR Y ROBUSTA
+type Props = {
+    params: { id: string };
+};
+
+// 3. USAMOS EL NUEVO TIPO 'Props' EN LA FUNCIÓN
+export default async function OrdenDetallesPage({ params }: Props) {
     const { data: orden, error } = await supabase.from('ordenes').select('*').eq('id', params.id).single();
 
-    if (error || !orden) return <p className="text-red-500">Error: No se pudo encontrar la orden.</p>;
+    if (error || !orden) {
+        return (
+            <div className="container mx-auto p-4 text-center">
+                <h1 className="text-3xl font-bold mb-6">Error al Cargar</h1>
+                <p>No se pudo encontrar la orden con el ID proporcionado.</p>
+                <Link href="/" className="mt-4">
+                    <Button variant="outline">&larr; Volver al Dashboard</Button>
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-4 md:p-8">
@@ -58,7 +75,14 @@ export default async function OrdenDetallesPage({ params }: { params: { id: stri
                             <div className="flex flex-wrap gap-4">
                                 {orden.fotos_url.map((url: string, index: number) => (
                                     <a key={index} href={url} target="_blank" rel="noopener noreferrer">
-                                        <img src={url} alt={`Foto ${index + 1}`} className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-lg border hover:scale-105 transition-transform" />
+                                        {/* 4. REEMPLAZAMOS <img> POR <Image> */}
+                                        <Image
+                                            src={url}
+                                            alt={`Foto ${index + 1}`}
+                                            width={160} // Next.js requiere width y height
+                                            height={160}
+                                            className="object-cover rounded-lg border hover:scale-105 transition-transform"
+                                        />
                                     </a>
                                 ))}
                             </div>
