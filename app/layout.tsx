@@ -1,7 +1,7 @@
 // app/layout.tsx (VERSIÓN FINAL)
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./styles.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/app/providers";
 import { ThemeToggle } from "@/components/ThemeToggle"; // 1. Importamos el botón
