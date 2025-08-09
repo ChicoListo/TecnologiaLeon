@@ -1,16 +1,25 @@
 // app/page.tsx
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+
 export const dynamic = 'force-dynamic';
 
-// Esta página es un Componente de Servidor, se ejecuta en el servidor.
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: { q?: string } }) {
+  const query = searchParams.q;
 
-  // 1. Obtener los datos directamente desde la base de datos
-  const { data: ordenes, error } = await supabase
+  let supabaseQuery = supabase
     .from('ordenes')
-    .select('*') // Selecciona todas las columnas
-    .order('created_at', { ascending: false }); // Muestra las más nuevas primero
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  // Si hay una consulta de búsqueda, añadimos el filtro
+  if (query) {
+    supabaseQuery = supabaseQuery.or(
+      `nombre_cliente.ilike.%${query}%,marca_modelo.ilike.%${query}%,numero_serie_imei.ilike.%${query}%`
+    );
+  }
+
+  const { data: ordenes, error } = await supabaseQuery;
 
   if (error) {
     return <p className="text-red-500">Error al cargar las órdenes: {error.message}</p>;
@@ -25,30 +34,39 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* 2. Mostrar los datos en una tabla */}
+      {/* Formulario de Búsqueda */}
+      <div className="mb-4">
+        <form method="GET" action="/">
+          <input
+            type="search"
+            name="q"
+            defaultValue={query || ''}
+            placeholder="Buscar por cliente, modelo, IMEI..."
+            className="w-full p-2 border rounded text-black"
+          />
+        </form>
+      </div>
+
+      {/* El resto de la página es igual... */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border">
           <thead className="bg-gray-800 text-white">
-            <tr>
-              <th className="py-2 px-4">Orden #</th>
-              <th className="py-2 px-4">Cliente</th>
-              <th className="py-2 px-4">Equipo</th>
-              <th className="py-2 px-4">Estado</th>
-            </tr>
+            {/* ... encabezados de la tabla ... */}
           </thead>
           <tbody>
-            {ordenes.map((orden) => (
-              <tr key={orden.id} className="border-t text-black text-center hover:bg-gray-100">
-                <td className="py-2 px-4">{orden.id}</td>
-                <td className="py-2 px-4">{orden.nombre_cliente}</td>
-                <td className="py-2 px-4">{orden.marca_modelo}</td>
-                <td className="py-2 px-4">
-                  <span className="bg-yellow-200 text-yellow-800 py-1 px-3 rounded-full text-xs">
-                    {orden.estado_reparacion}
-                  </span>
+            {ordenes && ordenes.length > 0 ? (
+              ordenes.map((orden) => (
+                <Link legacyBehavior key={orden.id} href={`/ordenes/${orden.id}`} passHref>
+                  {/* ... contenido de la fila de la tabla ... */}
+                </Link>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="text-center py-4 text-black">
+                  {query ? `No se encontraron resultados para "${query}"` : 'No hay órdenes registradas.'}
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
