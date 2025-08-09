@@ -56,9 +56,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           <tbody>
             {ordenes && ordenes.length > 0 ? (
               ordenes.map((orden) => (
-                <Link legacyBehavior key={orden.id} href={`/ordenes/${orden.id}`} passHref>
-                  {/* ... contenido de la fila de la tabla ... */}
-                </Link>
+                // Ahora el <tr> es el elemento principal, no el <Link>
+                <tr key={orden.id} className="border-t text-black text-center hover:bg-gray-100">
+                  <td className="py-2 px-4">
+                    {/* Ponemos el Link dentro de la celda. Ya no necesitamos legacyBehavior */}
+                    <Link href={`/ordenes/${orden.id}`} className="text-blue-600 font-medium hover:underline">
+                      #{orden.id}
+                    </Link>
+                  </td>
+                  <td className="py-2 px-4">{orden.nombre_cliente}</td>
+                  <td className="py-2 px-4">{orden.marca_modelo}</td>
+                  <td className="py-2 px-4">
+                    <span className="bg-yellow-200 text-yellow-800 py-1 px-3 rounded-full text-xs">
+                      {orden.estado_reparacion}
+                    </span>
+                  </td>
+                </tr>
               ))
             ) : (
               <tr>
