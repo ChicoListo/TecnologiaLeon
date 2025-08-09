@@ -73,4 +73,4 @@ export default async function OrdenDetallesPage({ params }: { params: { id: stri
             </div>
         </div>
     );
-}git add.
+}
