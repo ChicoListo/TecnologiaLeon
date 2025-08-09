@@ -39,7 +39,7 @@ export default function EditarOrdenPage() {
         const fetchOrden = async () => {
             if (!id) return;
 
-            const { data, error } = await supabase
+            const { data, error: _error } = await supabase
                 .from('ordenes')
                 .select('*')
                 .eq('id', id)
