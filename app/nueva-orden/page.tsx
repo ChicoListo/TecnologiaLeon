@@ -1,5 +1,5 @@
 // app/nueva-orden/page.tsx
-'use client'; // Esto es un Componente de Cliente
+'use client';
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -27,7 +27,6 @@ export default function NuevaOrdenPage() {
         setIsSubmitting(true);
 
         try {
-            // 1. Subir imágenes a Supabase Storage
             const uploadedImageUrls: string[] = [];
             for (const file of fotos) {
                 const filePath = `public/${Date.now()}-${file.name}`;
@@ -44,7 +43,6 @@ export default function NuevaOrdenPage() {
                 uploadedImageUrls.push(urlData.publicUrl);
             }
 
-            // 2. Insertar la orden en la tabla `ordenes` de PostgreSQL
             const { error: insertError } = await supabase.from('ordenes').insert([
                 {
                     nombre_cliente: nombreCliente,
@@ -53,17 +51,21 @@ export default function NuevaOrdenPage() {
                     marca_modelo: marcaModelo,
                     problema_reportado: problemaReportado,
                     fotos_url: uploadedImageUrls,
-                    estado_reparacion: 'Recibido', // Estado inicial
+                    estado_reparacion: 'Recibido',
                 },
             ]);
 
             if (insertError) throw insertError;
 
             alert('Orden creada con éxito!');
-            router.push('/'); // Redirige al dashboard
-        } catch (error: any) {
+            router.push('/');
+        } catch (error) { // <-- ¡CÓDIGO CORREGIDO AQUÍ!
+            let errorMessage = 'Ocurrió un error desconocido.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             console.error('Error creando la orden:', error);
-            alert(`Error: ${error.message}`);
+            alert(`Error: ${errorMessage}`);
         } finally {
             setIsSubmitting(false);
         }
