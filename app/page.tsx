@@ -1,6 +1,7 @@
 // app/page.tsx
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+export const dynamic = 'force-dynamic';
 
 // Esta página es un Componente de Servidor, se ejecuta en el servidor.
 export default async function DashboardPage() {
